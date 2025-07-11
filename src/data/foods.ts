@@ -1,12 +1,12 @@
 import { Food } from "@/types/food";
 
-export const FOODS = [
+const FOODS = [
   {
-    id: "worm",
-    name: "Worm",
+    id: "worms",
+    name: "Worms",
     buyPrice: 4,
     sellPrice: 2,
-    image: "worm.png",
+    image: "worms.png",
   },
   {
     id: "seeds",
@@ -17,14 +17,14 @@ export const FOODS = [
   },
 ] as Food[];
 
-export const getFoodByName = (name: string): Food => {
-  return (
-    FOODS.find((food) => food.name === name) ?? {
-      id: "unknown",
-      name: "Unknown Food",
-      buyPrice: 0,
-      sellPrice: 0,
-      image: "unknown.png",
-    }
-  );
+export const getAllFoods = () => {
+  return FOODS;
+};
+
+export const getFoodById = (id: string) => {
+  return FOODS.find((food) => food.id === id);
+};
+
+export const getFoodByName = (name: string) => {
+  return FOODS.find((food) => food.name === name);
 };

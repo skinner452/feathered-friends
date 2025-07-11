@@ -1,4 +1,6 @@
 import { CHANCES } from "@/config/chances";
+import { getBirdById } from "@/data/birds";
+import { getRegionById } from "@/data/regions";
 import { getBirdSoundSrc } from "@/types/bird";
 import { Feeder, getFeederFoodCount } from "@/types/feeders";
 import { getRegionSoundSrc } from "@/types/region";
@@ -13,12 +15,17 @@ export const useFeederSounds = (feeder: Feeder) => {
   const activeSounds = useRef<string[]>([]);
 
   useEffect(() => {
+    if(!feeder?.regionId) return;
+
     // REGION SOUNDS
-    const regionSound = playAudio(getRegionSoundSrc(feeder.region), 0.3, true);
+    const region = getRegionById(feeder.regionId);
+    const regionSound = playAudio(getRegionSoundSrc(region), 0.3, true);
     return () => stopAudio(regionSound);
-  }, [feeder.region]);
+  }, [feeder?.regionId]);
 
   useEffect(() => {
+    if(!feeder?.birds) return;
+
     // BIRD ARRIVAL/DEPARTURE SOUNDS
 
     if (birdCount.current === null) {
@@ -39,13 +46,17 @@ export const useFeederSounds = (feeder: Feeder) => {
 
     // Update the bird count
     birdCount.current = feeder.birds.length;
-  }, [feeder.birds]);
+  }, [feeder?.birds]);
 
   useEffect(() => {
+    if(!feeder?.birds) return;
+
     // BIRD SOUNDS
     const playBirdSounds = async () => {
       feeder.birds.forEach((feederBird) => {
-        const sound = getBirdSoundSrc(feederBird.bird);
+        const bird = getBirdById(feederBird.birdId);
+
+        const sound = getBirdSoundSrc(bird);
         if (activeSounds.current.includes(sound)) return; // Already playing this bird's sound
 
         const x = Math.random();
@@ -66,9 +77,11 @@ export const useFeederSounds = (feeder: Feeder) => {
 
     const interval = setInterval(playBirdSounds, 1000); // Attempt bird sounds every second
     return () => clearInterval(interval);
-  }, [feeder.birds]);
+  }, [feeder?.birds]);
 
   useEffect(() => {
+    if(!feeder) return;
+
     // BIRD EATING SOUNDS
 
     const newFoodCount = getFeederFoodCount(feeder);

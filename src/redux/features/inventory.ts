@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { Inventory } from "@/types/inventory";
-import { Food } from "@/types/food";
-import { Feather } from "@/types/feather";
 
 export const inventorySlice = createSlice({
   name: "inventory",
@@ -22,31 +20,38 @@ export const inventorySlice = createSlice({
     },
     addFoodToInventory: (
       state,
-      action: PayloadAction<{ food: Food; quantity: number }>
+      action: PayloadAction<{ foodId: string; quantity: number }>
     ) => {
-      const food = state.foods.find(
-        (f) => f.food.id === action.payload.food.id
+      const { foodId, quantity } = action.payload;
+
+      const existingFood = state.foods.find(
+        (invFood) => invFood.foodId === foodId
       );
-      if (food) {
-        food.quantity += action.payload.quantity;
+      if (existingFood) {
+        existingFood.quantity += quantity;
       } else {
         state.foods.push({
-          food: action.payload.food,
-          quantity: action.payload.quantity,
+          foodId,
+          quantity,
         });
       }
       return state;
     },
     removeFoodFromInventory: (
       state,
-      action: PayloadAction<{ id: string; quantity: number }>
+      action: PayloadAction<{ foodId: string; quantity: number }>
     ) => {
-      const food = state.foods.find((f) => f.food.id === action.payload.id);
-      if (food) {
-        food.quantity -= action.payload.quantity;
-        if (food.quantity <= 0) {
+      const { foodId, quantity } = action.payload;
+
+      const existingFood = state.foods.find(
+        (invFood) => invFood.foodId === foodId
+      );
+      if (existingFood) {
+        existingFood.quantity -= quantity;
+        if (existingFood.quantity <= 0) {
+          // Zero (or negative) quantity remaining, remove from inventory
           state.foods = state.foods.filter(
-            (f) => f.food.id !== action.payload.id
+            (invFood) => invFood.foodId !== foodId
           );
         }
       }
@@ -54,33 +59,37 @@ export const inventorySlice = createSlice({
     },
     addFeatherToInventory: (
       state,
-      action: PayloadAction<{ feather: Feather }>
+      action: PayloadAction<{ featherId: string; quantity: number }>
     ) => {
-      const feather = state.feathers.find(
-        (f) => f.feather.id === action.payload.feather.id
+      const { featherId, quantity } = action.payload;
+
+      const existingFeather = state.feathers.find(
+        (invFeather) => invFeather.featherId === featherId
       );
-      if (feather) {
-        feather.quantity += 1;
+      if (existingFeather) {
+        existingFeather.quantity += quantity;
       } else {
         state.feathers.push({
-          feather: action.payload.feather,
-          quantity: 1,
+          featherId,
+          quantity,
         });
       }
       return state;
     },
     removeFeatherFromInventory: (
       state,
-      action: PayloadAction<{ id: string; quantity: number }>
+      action: PayloadAction<{ featherId: string; quantity: number }>
     ) => {
-      const feather = state.feathers.find(
-        (f) => f.feather.id === action.payload.id
+      const { featherId, quantity } = action.payload;
+
+      const existingFeather = state.feathers.find(
+        (invFeather) => invFeather.featherId === featherId
       );
-      if (feather) {
-        feather.quantity -= action.payload.quantity;
-        if (feather.quantity <= 0) {
+      if (existingFeather) {
+        existingFeather.quantity -= quantity;
+        if (existingFeather.quantity <= 0) {
           state.feathers = state.feathers.filter(
-            (f) => f.feather.id !== action.payload.id
+            (invFeather) => invFeather.featherId !== featherId
           );
         }
       }

@@ -1,47 +1,89 @@
 import { Bird } from "@/types/bird";
-import { getRegionByName, UNKNOWN_REGION } from "./regions";
+import { getRegionByName } from "./regions";
 import { getFoodByName } from "./foods";
 
-export const BIRDS = [
+const BIRDS = [
   {
     id: "american-robin",
     name: "American Robin",
-    region: getRegionByName("North America"),
-    foods: [getFoodByName("Worm")],
-    image: "american-robin.png",
+    regionId: getRegionByName("North America").id,
+    foodIds: [getFoodByName("Worms").id],
+    variants: [
+      {
+        id: "male",
+        name: "Male",
+        image: "american-robin/male.png",
+      },
+      {
+        id: "female",
+        name: "Female",
+        image: "american-robin/female.png",
+      },
+    ],
     coinsForSpotting: 10,
     sound: "american-robin.m4a",
   },
   {
     id: "mourning-dove",
     name: "Mourning Dove",
-    region: getRegionByName("North America"),
-    foods: [getFoodByName("Seeds")],
-    image: "mourning-dove.png",
+    regionId: getRegionByName("North America").id,
+    foodIds: [getFoodByName("Seeds").id],
+    variants: [
+      {
+        id: "male",
+        name: "Male",
+        image: "mourning-dove/male.png",
+      },
+      {
+        id: "female",
+        name: "Female",
+        image: "mourning-dove/female.png",
+      },
+    ],
     coinsForSpotting: 15,
     sound: "mourning-dove.mp3",
   },
   {
     id: "northern-cardinal",
     name: "Northern Cardinal",
-    region: getRegionByName("North America"),
-    foods: [getFoodByName("Seeds")],
-    image: "northern-cardinal.png",
+    regionId: getRegionByName("North America").id,
+    foodIds: [getFoodByName("Seeds").id],
+    variants: [
+      {
+        id: "male",
+        name: "Male",
+        image: "northern-cardinal/male.png",
+      },
+      {
+        id: "female",
+        name: "Female",
+        image: "northern-cardinal/female.png",
+      },
+    ],
     coinsForSpotting: 20,
     sound: "northern-cardinal.mp3",
-  }
+  },
 ] as Bird[];
 
-export const UNKNOWN_BIRD: Bird = {
-  id: "unknown",
-  name: "Unknown Bird",
-  region: UNKNOWN_REGION,
-  foods: [],
-  image: "unknown.png",
-  coinsForSpotting: 0,
-  sound: "unknown.mp3",
+export const getAllBirds = () => {
+  return BIRDS;
 };
 
-export const getBirdByName = (name: string): Bird => {
-  return BIRDS.find((bird) => bird.name === name) ?? UNKNOWN_BIRD;
+export const getBirdById = (id: string) => {
+  return BIRDS.find((bird) => bird.id === id);
+};
+
+export const getBirdByName = (name: string) => {
+  return BIRDS.find((bird) => bird.name === name);
+};
+
+export const getBirdsByRegionIdAndFoodId = (
+  regionId: string,
+  foodId: string
+) => {
+  return BIRDS.filter(
+    (bird) =>
+      bird.regionId === regionId &&
+      bird.foodIds.some((birdFoodId) => birdFoodId === foodId)
+  );
 };

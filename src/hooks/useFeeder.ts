@@ -1,11 +1,14 @@
 import {
   addFoodToFeeder,
+  removeFoodFromFeeder,
   selectFeederById,
   updateFeeder,
 } from "@/redux/features/feeders";
-import { removeFoodFromInventory } from "@/redux/features/inventory";
+import {
+  addFoodToInventory,
+  removeFoodFromInventory,
+} from "@/redux/features/inventory";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { Food } from "@/types/food";
 import { processFeeder } from "@/utils/processFeeder";
 import { useCallback, useEffect, useState } from "react";
 import { useFeederSounds } from "./useFeederSounds";
@@ -54,20 +57,42 @@ export const useFeeder = (feederId: string) => {
   }, [feeder, dispatch, isLive]);
 
   const addFood = useCallback(
-    (food: Food, quantity: number) => {
+    (foodId: string, quantity: number) => {
       if (!feeder) return;
 
       dispatch(
         addFoodToFeeder({
           feederId: feeder.id,
-          food,
+          foodId: foodId,
           quantity,
         })
       );
 
       dispatch(
         removeFoodFromInventory({
-          id: food.id,
+          foodId: foodId,
+          quantity,
+        })
+      );
+    },
+    [dispatch, feeder]
+  );
+
+  const removeFood = useCallback(
+    (foodId: string, quantity: number) => {
+      if (!feeder) return;
+
+      dispatch(
+        removeFoodFromFeeder({
+          feederId: feeder.id,
+          foodId: foodId,
+          quantity,
+        })
+      );
+
+      dispatch(
+        addFoodToInventory({
+          foodId: foodId,
           quantity,
         })
       );
@@ -78,5 +103,6 @@ export const useFeeder = (feederId: string) => {
   return {
     feeder,
     addFood,
+    removeFood,
   };
 };

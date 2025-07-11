@@ -4,6 +4,8 @@ import { CHANCES } from "@/config/chances";
 import { randomBoolean, randomInRange, selectRandom } from "./random";
 import { getFeatherByBirdId } from "@/data/feathers";
 import { formatDuration } from "./duration";
+import { getBirdById } from "@/data/birds";
+import { getBirdVariantIds } from "@/types/bird";
 
 // This function processes the feeder, simulating bird appearances, food consumption, and feather drops.
 // It returns the updated feeder state along with statistics on birds appeared, feathers dropped, and food eaten.
@@ -24,41 +26,36 @@ export const processFeeder = (prevFeeder: Feeder, seconds: number) => {
     birdChances.forEach((bc) => {
       const x = Math.random();
       if (x < bc.chancePerSecond) {
+        const bird = getBirdById(bc.birdId);
         feeder.birds.push({
           id: crypto.randomUUID(),
-          bird: bc.bird,
+          birdId: bc.birdId,
+          variantId: selectRandom(getBirdVariantIds(bird)),
           location: {
-            x: randomInRange(0.2, 0.8),
-            y: randomInRange(0.2, 0.8),
-            scale: randomInRange(0.3, 1),
+            x: randomInRange(0.1, 0.9),
+            y: randomInRange(0.1, 0.9),
+            scale: randomInRange(0.5, 1.0),
           },
           isFlipped: randomBoolean(),
           isSpotted: false,
         });
 
-        console.log("feeder.birds", feeder.birds);
-
         birdsAppeared += 1;
-
-        console.log(`A new bird appeared: ${bc.bird.name}`);
       }
     });
 
     // Check for bird actions
     feeder.birds.forEach((feederBird, idx) => {
+      const bird = getBirdById(feederBird.birdId);
+
       const feederFoodsForBird = feeder.foods.filter((feederFood) =>
-        feederBird.bird.foods.some(
-          (birdFood) => birdFood.id === feederFood.food.id
-        )
+        bird.foodIds.some((foodId) => foodId === feederFood.foodId)
       );
 
       if (feederFoodsForBird.length === 0) {
         // If the bird has no food source, remove it
         feeder.birds.splice(idx, 1);
         birdsLeft += 1;
-        console.log(
-          `Bird left because it's out of food: ${feederBird.bird.name}`
-        );
         return;
       }
 
@@ -66,7 +63,6 @@ export const processFeeder = (prevFeeder: Feeder, seconds: number) => {
       if (x < CHANCES.BIRD_LEAVES) {
         feeder.birds.splice(idx, 1);
         birdsLeft += 1;
-        console.log(`Bird left by chance: ${feederBird.bird.name}`);
         return;
       }
 
@@ -76,7 +72,7 @@ export const processFeeder = (prevFeeder: Feeder, seconds: number) => {
 
         feeder.foods = feeder.foods
           .map((feederFood) => {
-            if (feederFood.food.id === selectedFood.food.id) {
+            if (feederFood.foodId === selectedFood.foodId) {
               return {
                 ...feederFood,
                 quantity: feederFood.quantity - 1,
@@ -88,33 +84,27 @@ export const processFeeder = (prevFeeder: Feeder, seconds: number) => {
 
         foodEaten += 1;
 
-        console.log(
-          `Bird ate from feeder: ${feederBird.bird.name} ate ${selectedFood.food.name}`
-        );
-
         return;
       }
 
       const z = Math.random();
       if (z < CHANCES.BIRD_DROPS_FEATHER) {
-        const feather = getFeatherByBirdId(feederBird.bird.id);
+        const feather = getFeatherByBirdId(bird.id);
 
         const feederFeather: FeederFeather = {
           id: crypto.randomUUID(),
-          feather,
+          featherId: feather.id,
           quantity: 1,
           location: {
             x: randomInRange(0.2, 0.8),
             y: randomInRange(0.8, 0.9), // Keep it near the bottom
-            rotation: randomInRange(-180, 180),
+            rotation: randomInRange(-45, 45), // Slight rotation
           },
         };
 
         feeder.feathers.push(feederFeather);
 
         feathersDropped += 1;
-
-        console.log(`Bird dropped a feather: ${feather.bird.name}`);
       }
     });
   }

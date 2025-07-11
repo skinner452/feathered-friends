@@ -7,6 +7,7 @@ import {
   removeCoinsFromInventory,
 } from "./inventory";
 import { spotBird } from "./feeders";
+import { getFeatherById } from "@/data/feathers";
 
 export const progressSlice = createSlice({
   name: "progress",
@@ -28,26 +29,39 @@ export const progressSlice = createSlice({
         state.coinsSpent += action.payload;
       })
       .addCase(addFeatherToInventory, (state, action) => {
-        const birdId = action.payload.feather.bird.id;
-        const bird = state.birds.find((b) => b.id === birdId);
-        if (bird) {
-          bird.feathersCollected += 1;
+        const { featherId, quantity } = action.payload;
+
+        const feather = getFeatherById(featherId);
+
+        const existingBird = state.birds.find(
+          (progressBird) => progressBird.birdId === feather.birdId
+        );
+        if (existingBird) {
+          existingBird.feathersCollected += quantity;
         } else {
           state.birds.push({
-            id: birdId,
+            birdId: feather.birdId,
+            variantIds: [],
             timesSpotted: 0,
-            feathersCollected: 1,
+            feathersCollected: quantity,
           });
         }
       })
       .addCase(spotBird, (state, action) => {
-        const birdId = action.payload.birdId;
-        const bird = state.birds.find((b) => b.id === birdId);
-        if (bird) {
-          bird.timesSpotted += 1;
+        const { birdId, variantId } = action.payload;
+
+        const existingBird = state.birds.find(
+          (progressBird) => progressBird.birdId === birdId
+        );
+        if (existingBird) {
+          existingBird.timesSpotted += 1;
+          if (!existingBird.variantIds.includes(variantId)) {
+            existingBird.variantIds.push(variantId);
+          }
         } else {
           state.birds.push({
-            id: birdId,
+            birdId,
+            variantIds: [variantId],
             timesSpotted: 1,
             feathersCollected: 0,
           });

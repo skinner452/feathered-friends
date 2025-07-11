@@ -27,6 +27,11 @@ export default function Home() {
         onClick={() => router.push("/shop")}
         color="orange"
       />
+      <Button
+        text="Birds"
+        onClick={() => router.push("/birds")}
+        color="blue"
+      />
     </div>
   );
 }

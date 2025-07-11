@@ -1,6 +1,6 @@
 import { Region } from "@/types/region";
 
-export const REGIONS = [
+const REGIONS = [
   {
     id: "north-america",
     name: "North America",
@@ -9,13 +9,14 @@ export const REGIONS = [
   },
 ] as Region[];
 
-export const UNKNOWN_REGION: Region = {
-  id: "unknown",
-  name: "Unknown Region",
-  image: "unknown.png",
-  sound: "unknown.mp3",
+export const getAllRegions = () => {
+  return REGIONS;
 };
 
-export const getRegionByName = (name: string): Region => {
-  return REGIONS.find((region) => region.name === name) ?? UNKNOWN_REGION;
+export const getRegionById = (id: string) => {
+  return REGIONS.find((region) => region.id === id);
+};
+
+export const getRegionByName = (name: string) => {
+  return REGIONS.find((region) => region.name === name);
 };

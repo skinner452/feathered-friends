@@ -1,3 +1,6 @@
+import { getBirdById } from "@/data/birds";
+import { getFeatherById } from "@/data/feathers";
+import { getRegionById } from "@/data/regions";
 import { removeFeatherFromFeeder, spotBird } from "@/redux/features/feeders";
 import {
   addCoinsToInventory,
@@ -12,7 +15,8 @@ import { getRegionImageSrc } from "@/types/region";
 import { playAudio } from "@/utils/audio";
 import { getMiscSoundSrc } from "@/utils/sound";
 import Image from "next/image";
-import { useCallback } from "react";
+import { Fragment, useCallback, useMemo } from "react";
+import { Tooltip } from "react-tooltip";
 
 type Props = {
   feeder: Feeder;
@@ -32,11 +36,14 @@ export const FeederFrame = ({ feeder }: Props) => {
       spotBird({
         feederId: feeder.id,
         feederBirdId: feederBird.id,
-        birdId: feederBird.bird.id,
+        birdId: feederBird.birdId,
+        variantId: feederBird.variantId,
       })
     );
 
-    dispatch(addCoinsToInventory(feederBird.bird.coinsForSpotting));
+    const bird = getBirdById(feederBird.birdId);
+
+    dispatch(addCoinsToInventory(bird.coinsForSpotting));
   };
 
   const handleFeatherClick = useCallback(
@@ -47,7 +54,8 @@ export const FeederFrame = ({ feeder }: Props) => {
 
       dispatch(
         addFeatherToInventory({
-          feather: feederFeather.feather,
+          featherId: feederFeather.featherId,
+          quantity: 1,
         })
       );
 
@@ -61,60 +69,84 @@ export const FeederFrame = ({ feeder }: Props) => {
     [dispatch, feeder]
   );
 
+  const region = useMemo(() => {
+    return getRegionById(feeder.regionId);
+  }, [feeder.regionId]);
+
   return (
     <div className="relative w-full h-128">
       <Image
-        src={getRegionImageSrc(feeder.region)}
-        alt={feeder.region.name}
+        src={getRegionImageSrc(region)}
+        alt={region.name}
         fill
         className="object-cover"
       />
 
-      {feeder.birds.map((feederBird, idx) => (
-        <div
-          key={idx}
-          className={`absolute ${
-            feederBird.isSpotted ? "opacity-100" : "opacity-50 cursor-pointer"
-          }`}
-          style={{
-            left: `${feederBird.location.x * 100}%`,
-            top: `${feederBird.location.y * 100}%`,
-            transform: `scale(${feederBird.location.scale})`,
-            zIndex: feederBird.location.scale + 100, // Bigger birds appear on top
-          }}
-          onClick={() => handleBirdClick(feederBird)}
-        >
-          <Image
-            src={getBirdImageSrc(feederBird.bird)}
-            alt={feederBird.bird.name}
-            width={80}
-            height={80}
-            style={{
-              transform: feederBird.isFlipped ? "scaleX(-1)" : undefined,
-            }}
-          />
-        </div>
-      ))}
+      {feeder.feathers.map((feederFeather, idx) => {
+        const feather = getFeatherById(feederFeather.featherId);
 
-      {feeder.feathers.map((feederFeather, idx) => (
-        <div
-          key={idx}
-          className="absolute cursor-pointer"
-          style={{
-            left: `${feederFeather.location.x * 100}%`,
-            top: `${feederFeather.location.y * 100}%`,
-            transform: `rotate(${feederFeather.location.rotation}deg)`,
-          }}
-          onClick={() => handleFeatherClick(feederFeather)}
-        >
-          <Image
-            src={getFeatherImageSrc(feederFeather.feather)}
-            alt={getFeatherName(feederFeather.feather, progressBirds)}
-            width={64}
-            height={64}
-          />
-        </div>
-      ))}
+        return (
+          <div
+            key={idx}
+            className="absolute cursor-pointer"
+            style={{
+              left: `${feederFeather.location.x * 100}%`,
+              top: `${feederFeather.location.y * 100}%`,
+              transform: `rotate(${feederFeather.location.rotation}deg)`,
+            }}
+            onClick={() => handleFeatherClick(feederFeather)}
+          >
+            <Image
+              src={getFeatherImageSrc(feather)}
+              alt={getFeatherName(feather, progressBirds)}
+              width={64}
+              height={64}
+              className="hover:saturate-200"
+            />
+          </div>
+        );
+      })}
+
+      {feeder.birds.map((feederBird) => {
+        const bird = getBirdById(feederBird.birdId);
+        const variant = bird.variants.find(
+          (v) => v.id === feederBird.variantId
+        );
+
+        const tooltipId = `bird-tooltip-${feederBird.id}`;
+
+        return (
+          <Fragment key={feederBird.id}>
+            <Tooltip id={tooltipId} />
+            <div
+              className={`absolute ${
+                feederBird.isSpotted
+                  ? ""
+                  : "blur-xs cursor-pointer"
+              }`}
+              style={{
+                left: `${feederBird.location.x * 100}%`,
+                top: `${feederBird.location.y * 100}%`,
+                transform: `scale(${feederBird.location.scale})`,
+                zIndex: feederBird.location.scale + 100, // Bigger birds appear on top
+              }}
+              onClick={() => handleBirdClick(feederBird)}
+              data-tooltip-id={tooltipId}
+              data-tooltip-content={`${variant.name} ${bird.name}`}
+            >
+              <Image
+                src={getBirdImageSrc(bird, feederBird.variantId)}
+                alt={bird.name}
+                width={80}
+                height={80}
+                style={{
+                  transform: feederBird.isFlipped ? "scaleX(-1)" : undefined,
+                }}
+              />
+            </div>
+          </Fragment>
+        );
+      })}
     </div>
   );
 };

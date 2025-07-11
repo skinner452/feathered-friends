@@ -1,20 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { Feeder } from "@/types/feeders";
-import { Region } from "@/types/region";
-import { Food } from "@/types/food";
 
 export const feedersSlice = createSlice({
   name: "feeders",
   initialState: [] as Feeder[],
   reducers: {
-    createFeeder: (state, action: PayloadAction<{ region: Region }>) => {
-      const { region } = action.payload;
-      const name = `${region.name} Feeder`; // Default name format
+    createFeeder: (state, action: PayloadAction<{ regionId: string }>) => {
+      const { regionId } = action.payload;
+      const name = `New Feeder`;
       const newFeeder: Feeder = {
         id: crypto.randomUUID(),
         name,
-        region,
+        regionId,
         foods: [],
         birds: [],
         feathers: [],
@@ -27,18 +25,43 @@ export const feedersSlice = createSlice({
       state,
       action: PayloadAction<{
         feederId: string;
-        food: Food;
+        foodId: string;
         quantity: number;
       }>
     ) => {
-      const { feederId, food, quantity } = action.payload;
+      const { feederId, foodId, quantity } = action.payload;
       const feeder = state.find((f) => f.id === feederId);
       if (feeder) {
-        const existingFood = feeder.foods.find((f) => f.food.id === food.id);
+        const existingFood = feeder.foods.find(
+          (feederFood) => feederFood.foodId === foodId
+        );
         if (existingFood) {
           existingFood.quantity += quantity;
         } else {
-          feeder.foods.push({ food, quantity });
+          feeder.foods.push({ foodId, quantity });
+        }
+      }
+      return state;
+    },
+    removeFoodFromFeeder: (
+      state,
+      action: PayloadAction<{
+        feederId: string;
+        foodId: string;
+        quantity: number;
+      }>
+    ) => {
+      const { feederId, foodId, quantity } = action.payload;
+      const feeder = state.find((f) => f.id === feederId);
+      if (feeder) {
+        const existingFood = feeder.foods.find(
+          (feederFood) => feederFood.foodId === foodId
+        );
+        if (existingFood) {
+          existingFood.quantity -= quantity;
+          if (existingFood.quantity <= 0) {
+            feeder.foods = feeder.foods.filter((f) => f.foodId !== foodId);
+          }
         }
       }
       return state;
@@ -69,7 +92,12 @@ export const feedersSlice = createSlice({
     },
     spotBird: (
       state,
-      action: PayloadAction<{ feederId: string; feederBirdId: string; birdId: string }>
+      action: PayloadAction<{
+        feederId: string;
+        feederBirdId: string;
+        birdId: string;
+        variantId: string;
+      }>
     ) => {
       const { feederId, feederBirdId } = action.payload;
       const feeder = state.find((f) => f.id === feederId);
@@ -89,6 +117,7 @@ export const feedersSlice = createSlice({
 export const {
   createFeeder,
   addFoodToFeeder,
+  removeFoodFromFeeder,
   updateFeeder,
   removeFeatherFromFeeder,
   spotBird,

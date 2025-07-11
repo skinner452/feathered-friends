@@ -1,14 +1,11 @@
-import { Feather } from "./feather";
-import { Food } from "./food";
-
 export type Inventory = {
   coins: number;
   foods: {
-    food: Food;
+    foodId: string;
     quantity: number;
   }[];
   feathers: {
-    feather: Feather;
+    featherId: string;
     quantity: number;
   }[];
 };

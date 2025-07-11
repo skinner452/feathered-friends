@@ -16,7 +16,7 @@ export default function Feeders() {
   const handleCreateFeeder = useCallback(() => {
     dispatch(
       createFeeder({
-        region: getRegionByName("North America"),
+        regionId: getRegionByName("North America").id,
       })
     );
   }, [dispatch]);

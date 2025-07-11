@@ -1,36 +1,31 @@
 import { Feather } from "@/types/feather";
-import { getBirdByName, UNKNOWN_BIRD } from "./birds";
+import { getBirdByName } from "./birds";
 
-export const FEATHERS = [
+const FEATHERS = [
   {
     id: "american-robin",
-    bird: getBirdByName("American Robin"),
+    birdId: getBirdByName("American Robin").id,
     sellPrice: 10,
     image: "american-robin.png",
   },
   {
     id: "mourning-dove",
-    bird: getBirdByName("Mourning Dove"),
+    birdId: getBirdByName("Mourning Dove").id,
     sellPrice: 15,
     image: "mourning-dove.png",
   },
   {
     id: "northern-cardinal",
-    bird: getBirdByName("Northern Cardinal"),
+    birdId: getBirdByName("Northern Cardinal").id,
     sellPrice: 20,
     image: "northern-cardinal.png",
   },
 ] as Feather[];
 
-export const UNKNOWN_FEATHER: Feather = {
-  id: "unknown",
-  bird: UNKNOWN_BIRD,
-  sellPrice: 0,
-  image: "unknown.png",
+export const getFeatherById = (id: string) => {
+  return FEATHERS.find((feather) => feather.id === id);
 };
 
-export const getFeatherByBirdId = (birdId: string): Feather => {
-  return (
-    FEATHERS.find((feather) => feather.bird.id === birdId) ?? UNKNOWN_FEATHER
-  );
+export const getFeatherByBirdId = (birdId: string) => {
+  return FEATHERS.find((feather) => feather.birdId === birdId);
 };

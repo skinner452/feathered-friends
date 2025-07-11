@@ -1,5 +1,6 @@
 export type ProgressBird = {
-  id: string;
+  birdId: string;
+  variantIds: string[];
   timesSpotted: number;
   feathersCollected: number;
 };
